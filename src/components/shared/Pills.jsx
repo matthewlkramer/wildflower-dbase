@@ -77,3 +77,4 @@ export const EditablePills = ({
 };
 
 // Optionally, you can default-export Pills, or just import { Pills, EditablePills } as needed.
+export default Pills;

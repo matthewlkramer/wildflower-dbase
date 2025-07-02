@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import ResizableDataTable from './shared/ResizableDataTable';
-import UnifiedDetail from './UnifiedDetail';
+import { useState } from 'react';
+import { useNavigation } from '../hooks/useNavigation';
 import { useTableColumns } from '../hooks/useTableColumns';
 import { useUnifiedData } from '../hooks/useUnifiedData';
-import { useNavigation } from '../hooks/useNavigation';
-import { educatorTabsConfig, schoolTabsConfig, charterTabsConfig } from '../utils/tabsConfig';
 import { TABS } from '../utils/constants.js';
+import { charterTabsConfig, educatorTabsConfig, schoolTabsConfig } from '../utils/tabsConfig';
+import ResizableDataTable from './shared/ResizableDataTable';
+import UnifiedDetail from './UnifiedDetail';
 
 const WildflowerDatabase = () => {
   const [mainTab, setMainTab] = useState(TABS.SCHOOLS);
@@ -15,6 +15,8 @@ const WildflowerDatabase = () => {
   const schoolsResult = useUnifiedData(TABS.SCHOOLS, { includeInactive: true });
   const educatorsResult = useUnifiedData(TABS.EDUCATORS, { includeInactive: true });
   const chartersResult = useUnifiedData(TABS.CHARTERS);
+
+  const columns = useTableColumns(mainTab);
 
   const getCurrentData = () => {
     switch (mainTab) {
@@ -29,7 +31,24 @@ const WildflowerDatabase = () => {
     }
   };
 
-  const columns = useTableColumns(mainTab)
+  // Define mainTabs for the main navigation
+  const mainTabs = [
+    {
+      id: TABS.SCHOOLS,
+      label: 'Schools',
+      count: schoolsResult.data ? schoolsResult.data.length : 0
+    },
+    {
+      id: TABS.EDUCATORS,
+      label: 'Educators',
+      count: educatorsResult.data ? educatorsResult.data.length : 0
+    },
+    {
+      id: TABS.CHARTERS,
+      label: 'Charters',
+      count: chartersResult.data ? chartersResult.data.length : 0
+    }
+  ];
 
   const handleRowClick = (item) => navigateToItem(mainTab, item);
 
@@ -57,7 +76,7 @@ const WildflowerDatabase = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">            
+    <div className="h-screen flex flex-col bg-gray-50">
       <div className="bg-white shadow-sm border-b">
                 <div className="w-full px-6 lg:px-8 xl:px-12">
                     <div className="flex items-center justify-between py-4">
@@ -96,20 +115,21 @@ const WildflowerDatabase = () => {
                     </div>
                 </div>
             </div>      
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 min-h-0 overflow-hidden">
         {selectedItem ? (
           <div className="h-full">
             {renderDetailContent()}
           </div>
         ) : (
-          <div className="w-full px-6 lg:px-8 xl:px-12 h-full">
-            <ResizableDataTable
-              data={getCurrentData()}
-              columns={columns}
-              onRowClick={handleRowClick}
-              tableKey={mainTab}
-              loading={false}
-            />
+          <div className="w-full px-6 lg:px-8 xl:px-12 h-full min-h-0 flex flex-col">
+            <div className="flex-1 min-h-0 overflow-auto">
+              <ResizableDataTable
+                data={getCurrentData()}
+                columns={columns}
+                onRowClick={handleRowClick}
+                loading={schoolsResult.loading}
+              />
+            </div>
           </div>
         )}
       </div>

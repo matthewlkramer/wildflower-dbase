@@ -170,6 +170,11 @@ export const transformSchoolData = (r) => r && {
   activeLocationState: r['Current Physical Address - State'],
   targetCity: r['SSJ - Target City'] || null,
   targetState: r['SSJ - Target State'] || null,
+  locality: (r['Current Physical Address - City']
+    ? `${r['Current Physical Address - City']}${r['Current Physical Address - State'] ? ', ' + r['Current Physical Address - State'] : ''}`
+    : r['SSJ - Target City']
+      ? `${r['SSJ - Target City']}${r['SSJ - Target State'] ? ', ' + r['SSJ - Target State'] : ''}`
+      : ''),
   priorNames: r['Prior Names'] || '',
   narrative: r['Narrative'] || '',
   institutionalPartner: r['Institutional partner'] || null,
