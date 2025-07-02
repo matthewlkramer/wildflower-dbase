@@ -1,49 +1,50 @@
-import React from "react";
+import React from 'react';
 
-const SchoolActions = ({ school }) => (
-  <div className="space-y-8">
-    <div>
-      <h2 className="text-lg font-semibold mb-2">Notes</h2>
-      {(!school.notes || school.notes.length === 0) ? (
-        <div className="text-gray-500">No notes found.</div>
-      ) : (
-        <ul className="space-y-2">
-          {school.notes.map((note) => (
-            <li key={note.id} className="bg-gray-100 rounded p-3">
-              <div className="text-sm text-gray-600">{note.createdDate}</div>
-              <div className="font-medium">{note.noteText}</div>
-              <div className="text-xs text-gray-500">By: {note.createdBy}</div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-    <div>
-      <h2 className="text-lg font-semibold mb-2">Action Steps</h2>
-      {(!school.actionSteps || school.actionSteps.length === 0) ? (
-        <div className="text-gray-500">No action steps found.</div>
-      ) : (
-        <table className="min-w-full text-sm">
-          <thead>
-            <tr>
-              <th className="p-2 text-left">Item</th>
-              <th className="p-2 text-left">Assignee</th>
-              <th className="p-2 text-left">Status</th>
-              <th className="p-2 text-left">Due Date</th>
+const SchoolActions = ({ notes, actions }) => (
+  <div className="flex gap-8">
+    <div className="w-1/2">
+      <h2 className="font-semibold text-lg mb-2">Notes</h2>
+      <table className="min-w-full border rounded">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>By</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          {notes && notes.length ? notes.map(note => (
+            <tr key={note.id}>
+              <td>{note.createdDate}</td>
+              <td>{note.createdBy}</td>
+              <td>{note.noteText}</td>
             </tr>
-          </thead>
-          <tbody>
-            {school.actionSteps.map((step) => (
-              <tr key={step.id} className="border-b">
-                <td className="p-2">{step.item}</td>
-                <td className="p-2">{step.assigneeShortName}</td>
-                <td className="p-2">{step.status}</td>
-                <td className="p-2">{step.dueDate}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+          )) : <tr><td colSpan={3} className="text-center">No notes found</td></tr>}
+        </tbody>
+      </table>
+    </div>
+    <div className="w-1/2">
+      <h2 className="font-semibold text-lg mb-2">Action Steps</h2>
+      <table className="min-w-full border rounded">
+        <thead>
+          <tr>
+            <th>Due Date</th>
+            <th>Item</th>
+            <th>Status</th>
+            <th>Assignee</th>
+          </tr>
+        </thead>
+        <tbody>
+          {actions && actions.length ? actions.map(a => (
+            <tr key={a.id}>
+              <td>{a.dueDate}</td>
+              <td>{a.item}</td>
+              <td>{a.status}</td>
+              <td>{a.assigneeShortName}</td>
+            </tr>
+          )) : <tr><td colSpan={4} className="text-center">No action steps found</td></tr>}
+        </tbody>
+      </table>
     </div>
   </div>
 );

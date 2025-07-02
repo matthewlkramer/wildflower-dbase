@@ -20,7 +20,7 @@ import SchoolLocations from '../components/schools/SchoolLocations';
 import SchoolGovernance from '../components/schools/SchoolGovernance';
 import SchoolGuides from '../components/schools/SchoolGuides';
 import SchoolSupport from '../components/schools/SchoolSupport';
-import SchoolMembership from './components/schools/SchoolMembership'; 
+import SchoolMembership from '../components/schools/SchoolMembership'; 
 import SchoolFunds from '../components/schools/SchoolFunds'
 import SchoolActions from '../components/schools/SchoolActions';
 import SchoolInteractions from '../components/schools/SchoolInteractions';
@@ -86,6 +86,11 @@ export const schoolTabsConfig = [
     id: 'summary',
     label: 'Summary',
     renderContent: ({ entity }) => <SchoolSummary school={entity} />,
+  },
+  {
+    id: 'details',
+    label: 'Details',
+    renderContent: ({ entity }) => <SchoolDetails school={entity} />,
   },
   {
     id: 'educators',

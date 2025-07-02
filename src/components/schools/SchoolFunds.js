@@ -1,64 +1,60 @@
-import React from "react";
+import React from 'react';
 
-const SchoolFunds = ({ school }) => (
-  <div className="space-y-8">
-    <div>
-      <h2 className="text-lg font-semibold mb-2">Grants</h2>
-      {(!school.grants || school.grants.length === 0) ? (
-        <div className="text-gray-500">No grants found.</div>
-      ) : (
-        <table className="min-w-full text-sm">
-          <thead>
-            <tr>
-              <th className="p-2 text-left">Amount</th>
-              <th className="p-2 text-left">Issued By</th>
-              <th className="p-2 text-left">Status</th>
-              <th className="p-2 text-left">Issue Date</th>
-              <th className="p-2 text-left">Notes</th>
+const SchoolFunds = ({ grants, loans }) => (
+  <div className="flex gap-8">
+    {/* Grants */}
+    <div className="w-1/2">
+      <h2 className="font-semibold text-lg mb-2">Grants</h2>
+      <table className="min-w-full border rounded">
+        <thead>
+          <tr>
+            <th>Amount</th>
+            <th>Issue Date</th>
+            <th>Source</th>
+            <th>Status</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {grants && grants.length ? grants.map(grant => (
+            <tr key={grant.id}>
+              <td>{grant.amount}</td>
+              <td>{grant.issueDate}</td>
+              <td>{grant.fundingSource}</td>
+              <td>{grant.status}</td>
+              <td>{grant.notes}</td>
             </tr>
-          </thead>
-          <tbody>
-            {school.grants.map((grant) => (
-              <tr key={grant.id} className="border-b">
-                <td className="p-2">${grant.amount}</td>
-                <td className="p-2">{grant.issuedBy}</td>
-                <td className="p-2">{grant.status}</td>
-                <td className="p-2">{grant.issueDate}</td>
-                <td className="p-2">{grant.notes}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+          )) : <tr><td colSpan={5} className="text-center">No grants found</td></tr>}
+        </tbody>
+      </table>
     </div>
-    <div>
-      <h2 className="text-lg font-semibold mb-2">Loans</h2>
-      {(!school.loans || school.loans.length === 0) ? (
-        <div className="text-gray-500">No loans found.</div>
-      ) : (
-        <table className="min-w-full text-sm">
-          <thead>
-            <tr>
-              <th className="p-2 text-left">Amount</th>
-              <th className="p-2 text-left">Status</th>
-              <th className="p-2 text-left">Issue Date</th>
-              <th className="p-2 text-left">Maturity</th>
-              <th className="p-2 text-left">Notes</th>
+    {/* Loans */}
+    <div className="w-1/2">
+      <h2 className="font-semibold text-lg mb-2">Loans</h2>
+      <table className="min-w-full border rounded">
+        <thead>
+          <tr>
+            <th>Amount</th>
+            <th>Issue Date</th>
+            <th>Maturity</th>
+            <th>Interest Rate</th>
+            <th>Status</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {loans && loans.length ? loans.map(loan => (
+            <tr key={loan.id}>
+              <td>{loan.amount}</td>
+              <td>{loan.issueDate}</td>
+              <td>{loan.maturityDate}</td>
+              <td>{loan.interestRate}</td>
+              <td>{loan.status}</td>
+              <td>{loan.notes}</td>
             </tr>
-          </thead>
-          <tbody>
-            {school.loans.map((loan) => (
-              <tr key={loan.id} className="border-b">
-                <td className="p-2">${loan.amount}</td>
-                <td className="p-2">{loan.status}</td>
-                <td className="p-2">{loan.issueDate}</td>
-                <td className="p-2">{loan.maturityDate}</td>
-                <td className="p-2">{loan.notes}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+          )) : <tr><td colSpan={6} className="text-center">No loans found</td></tr>}
+        </tbody>
+      </table>
     </div>
   </div>
 );

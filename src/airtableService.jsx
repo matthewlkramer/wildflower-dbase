@@ -1,7 +1,7 @@
 // src/airtableService.jsx
 
 import { AIRTABLE_CONFIG, TABLES } from './airtableConfig.js';
-//import { rateLimiter } from './utils/rateLimiter.js';
+import { rateLimiter } from './utils/rateLimiter.js';
 
 class AirtableService {
     constructor() {
@@ -14,74 +14,70 @@ class AirtableService {
 
     // Generic method to fetch records from any table
     async fetchRecords(tableName, options = {}) {
-        try {
-            const {
-                view,
-                maxRecords = 10000, // Get all records by default
-                pageSize = 100,
-                sort,
-                filterByFormula,
-                fields
-            } = options;
+        const {
+            view,
+            maxRecords = 10000, // Get all records by default
+            pageSize = 100,
+            sort,
+            filterByFormula,
+            fields
+        } = options;
 
-            let allRecords = [];
-            let offset = null;
-            let pageCount = 0;
+        let allRecords = [];
+        let offset = null;
+        let pageCount = 0;
 
-            do {
-                const params = new URLSearchParams();
-                if (view) params.append('view', view);
-                if (pageSize) params.append('pageSize', pageSize);
-                if (sort) params.append('sort[0][field]', sort.field);
-                if (sort) params.append('sort[0][direction]', sort.direction || 'asc');
-                if (filterByFormula) params.append('filterByFormula', filterByFormula);
-                if (fields) fields.forEach(field => params.append('fields[]', field));
-                if (offset) params.append('offset', offset);
-
-                const url = `${this.baseUrl}/${encodeURIComponent(tableName)}?${params}`;
-
-                const response = await rateLimiter.throttle(() => 
-                    fetch(url, { 
-                        headers: this.headers,
-                        mode: 'cors'
-                    })
-                );
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    // Airtable API Error
-                    throw new Error(`Airtable API error: ${response.status} - ${errorText}`);
-                }
-
-                const data = await response.json();
-                const recordsInThisPage = data.records || [];
-
-                allRecords = allRecords.concat(recordsInThisPage);
-                offset = data.offset;
-                pageCount++;
-
-
-                // Stop if no more pages or we've reached maxRecords
-                if (!offset || allRecords.length >= maxRecords) {
-                    break;
-                }
-
-                // Safety check to prevent infinite loops
-                if (pageCount > 100) {
-                    // Stopping after 100 pages to prevent infinite loop
-                    break;
-                }
-
-            } while (offset);
-
-            // Trim to maxRecords if we got too many
-            if (allRecords.length > maxRecords) {
-                allRecords = allRecords.slice(0, maxRecords);
+        do {
+            const params = new URLSearchParams();
+            if (view) params.append('view', view);
+            if (pageSize) params.append('pageSize', pageSize);
+            if (sort && sort.field) {
+                params.append('sort[0][field]', sort.field);
+                params.append('sort[0][direction]', sort.direction || 'asc');
             }
-            return this.transformRecords(allRecords);
-        } catch (error) {
-            throw error;
+            if (filterByFormula) params.append('filterByFormula', filterByFormula);
+            if (fields && Array.isArray(fields)) fields.forEach(field => params.append('fields[]', field));
+            if (offset) params.append('offset', offset);
+
+            const url = `${this.baseUrl}/${encodeURIComponent(tableName)}?${params.toString()}`;
+
+            const response = await rateLimiter.throttle(() =>
+                fetch(url, {
+                    headers: this.headers,
+                    mode: 'cors'
+                })
+            );
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Airtable API error: ${response.status} - ${errorText}`);
+            }
+
+            const data = await response.json();
+            const recordsInThisPage = data.records || [];
+
+            allRecords = allRecords.concat(recordsInThisPage);
+            offset = data.offset;
+            pageCount++;
+
+            // Stop if no more pages or we've reached maxRecords
+            if (!offset || allRecords.length >= maxRecords) {
+                break;
+            }
+
+            // Safety check to prevent infinite loops
+            if (pageCount > 100) {
+                // Stopping after 100 pages to prevent infinite loop
+                break;
+            }
+
+        } while (offset);
+
+        // Trim to maxRecords if we got too many
+        if (allRecords.length > maxRecords) {
+            allRecords = allRecords.slice(0, maxRecords);
         }
+        return this.transformRecords(allRecords);
     }
 
     // Transform Airtable records to a more usable format
@@ -96,87 +92,69 @@ class AirtableService {
 
     // Create a new record
     async createRecord(tableName, fields) {
-        try {
-            const url = `${this.baseUrl}/${encodeURIComponent(tableName)}`;
-            const response = await rateLimiter.throttle(() =>
-                fetch(url, {
-                    method: 'POST',
-                    headers: this.headers,
-                    body: JSON.stringify({ fields })
-                })
-            );
+        const url = `${this.baseUrl}/${encodeURIComponent(tableName)}`;
+        const response = await rateLimiter.throttle(() =>
+            fetch(url, {
+                method: 'POST',
+                headers: this.headers,
+                body: JSON.stringify({ fields })
+            })
+        );
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            return this.transformRecords([data])[0];
-        } catch (error) {
-            throw error;
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        const data = await response.json();
+        return this.transformRecords([data])[0];
     }
 
     // Update a record
     async updateRecord(tableName, recordId, fields) {
-        try {
-            const url = `${this.baseUrl}/${encodeURIComponent(tableName)}/${recordId}`;
-            const response = await rateLimiter.throttle(() =>
-                fetch(url, {
-                    method: 'PATCH',
-                    headers: this.headers,
-                    body: JSON.stringify({ fields })
-                })
-            );
+        const url = `${this.baseUrl}/${encodeURIComponent(tableName)}/${recordId}`;
+        const response = await rateLimiter.throttle(() =>
+            fetch(url, {
+                method: 'PATCH',
+                headers: this.headers,
+                body: JSON.stringify({ fields })
+            })
+        );
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            return this.transformRecords([data])[0];
-        } catch (error) {
-            throw error;
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        const data = await response.json();
+        return this.transformRecords([data])[0];
     }
 
     // Delete a record
     async deleteRecord(tableName, recordId) {
-        try {
-            const url = `${this.baseUrl}/${encodeURIComponent(tableName)}/${recordId}`;
-            const response = await rateLimiter.throttle(() =>
-                fetch(url, {
-                    method: 'DELETE',
-                    headers: this.headers
-                })
-            );
+        const url = `${this.baseUrl}/${encodeURIComponent(tableName)}/${recordId}`;
+        const response = await rateLimiter.throttle(() =>
+            fetch(url, {
+                method: 'DELETE',
+                headers: this.headers
+            })
+        );
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            return true;
-        } catch (error) {
-            throw error;
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        return true;
     }
 
     // Get table schema/fields
     async getTableFields(tableName) {
-        try {
-            // Fetch just one record to inspect fields
-            const options = { maxRecords: 1 };
-            const records = await this.fetchRecords(tableName, options);
-            
-            if (records.length > 0) {
-                const fields = Object.keys(records[0]).filter(key => key !== 'id' && key !== 'createdTime');
-                return fields;
-            }
-            
-            return [];
-        } catch (error) {
-            return [];
+        // Fetch just one record to inspect fields
+        const options = { maxRecords: 1 };
+        const records = await this.fetchRecords(tableName, options);
+        if (records.length > 0) {
+            const fields = Object.keys(records[0]).filter(key => key !== 'id' && key !== 'createdTime');
+            return fields;
         }
+        return [];
     }
 
     // Fetch schools
@@ -194,14 +172,12 @@ class AirtableService {
     }
 
     // Fetch educators
-    async fetchEducators(includeInactive = false) {
+    async fetchEducators() {
         const options = {
             sort: { field: 'Last Name', direction: 'asc' },
         };
-
+        // includeInactive is not used, so we don't add filterByFormula
         const result = await this.fetchRecords(TABLES.EDUCATORS, options);
-
-
         return result;
     }
 

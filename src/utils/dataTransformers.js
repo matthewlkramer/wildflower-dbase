@@ -1,493 +1,343 @@
 // src/utils/dataTransformers.js
 
-// Helper functions
+// ---- Helpers ----
 const safeExtract = (field) => {
-  if (Array.isArray(field)) {
-    return field.length > 0 ? field[0] : null;
-  }
+  if (Array.isArray(field)) return field.length > 0 ? field[0] : null;
   return field || null;
 };
-
 const safeNumber = (field) => {
-  if (field === null || field === undefined || field === '') return null;
+  if (field === null || field === undefined || field === "") return null;
   const num = parseFloat(field);
   return isNaN(num) ? null : num;
 };
-
 const safeInterestRate = (field) => {
-  if (field === null || field === undefined || field === '') return null;
+  if (field === null || field === undefined || field === "") return null;
   let rate = parseFloat(field);
   if (isNaN(rate)) return null;
-  return rate; // Airtable percent fields are already decimals
+  return rate;
 };
 
+// ---- Single-record transformers ----
 
-// Transform grant data with actual Airtable field names
-export const transformGrantData = (airtableRecord) => {
-  if (!airtableRecord) return null;
-
-  return {
-    id: airtableRecord.id,
-    schoolId: airtableRecord['school_id'], // Use the formula field, not the relationship
-    schoolShortName: airtableRecord['School Short Name'] || '', // Lookup field
-    amount: safeNumber(airtableRecord['Amount']), // Currency field
-    issueDate: airtableRecord['Issue Date'] || null, // Date field
-    issuedBy: airtableRecord['Issued by Short Name'] || 'Unknown',
-    fundingSource: airtableRecord['Funding Source'] || '', // Single select
-    status: airtableRecord['Grant Status'] || 'Unknown', // Single select
-    notes: airtableRecord['Notes'] || '', // Multiline text
-    accountingNotes: airtableRecord['Accounting Notes'] || '', // Multiline text
-    textForLedgerEntry: airtableRecord['Text for Ledger Entry'] || '',
-    fundingPurpose: airtableRecord['Funding purpose (for grant agreement)'] || '',
-    fundingPeriod: airtableRecord['Funding period (for grant agreement)'] || '', 
-    automationStep: airtableRecord['Automation step trigger'] || '', // Single select
-    prelimAdviceReqTime: airtableRecord['Preliminary advice request time'] || '', // Date field
-    fullAdviceReqTime: airtableRecord['Full advice request time'] || '', // Date field
-    unsignedGrantAgreement: airtableRecord['Unsigned Grant Agreement'] || '', // Attachment field
-    signedGrantAgreement: airtableRecord['Signed Grant Agreement'] || '', // Attachment field
-  };
+export const transformGrantData = (r) => r && {
+  id: r.id,
+  schoolId: r['school_id'],
+  schoolShortName: r['School Short Name'] || '',
+  amount: safeNumber(r['Amount']),
+  issueDate: r['Issue Date'] || null,
+  issuedBy: r['Issued by Short Name'] || 'Unknown',
+  fundingSource: r['Funding Source'] || '',
+  status: r['Grant Status'] || 'Unknown',
+  notes: r['Notes'] || '',
+  accountingNotes: r['Accounting Notes'] || '',
+  textForLedgerEntry: r['Text for Ledger Entry'] || '',
+  fundingPurpose: r['Funding purpose (for grant agreement)'] || '',
+  fundingPeriod: r['Funding period (for grant agreement)'] || '',
+  automationStep: r['Automation step trigger'] || '',
+  prelimAdviceReqTime: r['Preliminary advice request time'] || '',
+  fullAdviceReqTime: r['Full advice request time'] || '',
+  unsignedGrantAgreement: r['Unsigned Grant Agreement'] || '',
+  signedGrantAgreement: r['Signed Grant Agreement'] || '',
 };
 
-// Transform loan data with actual Airtable field names
-export const transformLoanData = (airtableRecord) => {
-  if (!airtableRecord) return null;
-
-  return {
-    id: airtableRecord.id,
-    schoolId: airtableRecord['school_id'], // Use the formula field, not the relationship
-    amount: safeNumber(airtableRecord['Amount Issued']), // Currency field
-    issueDate: airtableRecord['Effective Issue Date'] || null, // Date field
-    maturityDate: airtableRecord['Maturity'] || null, // Date field
-    interestRate: safeInterestRate(airtableRecord['Interest Rate']), // Percent field
-    status: airtableRecord['Loan Status'] || 'Active', // Single select
-    useOfProceeds: airtableRecord['Use of Proceeds'] || '', // Single select
-    issueMethod: airtableRecord['Issue Method'] || '', // Single select
-    approximateOutstanding: safeNumber(airtableRecord['Approximate Outstanding Amount']),
-    notes: airtableRecord['Notes'] || '', // Multiline text
-    createdTime: airtableRecord.createdTime
-  };
+export const transformLoanData = (r) => r && {
+  id: r.id,
+  schoolId: r['school_id'],
+  amount: safeNumber(r['Amount Issued']),
+  issueDate: r['Effective Issue Date'] || null,
+  maturityDate: r['Maturity'] || null,
+  interestRate: safeInterestRate(r['Interest Rate']),
+  status: r['Loan Status'] || 'Active',
+  useOfProceeds: r['Use of Proceeds'] || '',
+  issueMethod: r['Issue Method'] || '',
+  approximateOutstanding: safeNumber(r['Approximate Outstanding Amount']),
+  notes: r['Notes'] || '',
+  createdTime: r.createdTime
 };
 
-// Transform guide assignment data with actual Airtable field names
-export const transformGuideAssignmentData = (airtableRecord) => {
-  if (!airtableRecord) return null;
-
-  return {
-    id: airtableRecord.id,
-    schoolId: airtableRecord['school_id'], // Use the formula field, not the relationship
-    schoolName: airtableRecord['School Short Name'], // Lookup field
-    guideId: airtableRecord['guide_id'], // Use the formula field
-    guideShortName: airtableRecord['Guide short name'] || 'Unknown', // Lookup
-    type: airtableRecord['Type'] || '', // Single select (Type field)
-    startDate: airtableRecord['Start date'] || null, // Date field
-    endDate: airtableRecord['End date'] || null, // Date field
-    currentlyActive: airtableRecord['Currently active'], // Checkbox field
-    createdTime: airtableRecord.createdTime
-  };
+export const transformGuideAssignmentData = (r) => r && {
+  id: r.id,
+  schoolId: r['school_id'],
+  schoolName: r['School Short Name'],
+  guideId: r['guide_id'],
+  guideShortName: r['Guide short name'] || 'Unknown',
+  type: r['Type'] || '',
+  startDate: r['Start date'] || null,
+  endDate: r['End date'] || null,
+  currentlyActive: r['Currently active'],
+  createdTime: r.createdTime
 };
 
-// Transform location data with actual Airtable field names
-export const transformLocationData = (airtableRecord) => {
-  if (!airtableRecord) return null;
-
-  return {
-    id: airtableRecord.id,
-    schoolId: airtableRecord['school_id'], // Use the formula field, not the relationship
-    address: airtableRecord['Address'] || '', // Rich text field
-    startDate: airtableRecord['Start of time at location'] || '', // Date field
-    endDate: airtableRecord['End of time at location'] || null, // Date field
-    locationType: airtableRecord['Location type'] || '', // Single select
-    currentMailingAddress: airtableRecord['Current mailing address?'], // Checkbox
-    currentPhysicalAddress: airtableRecord['Current physical address?'], // Checkbox
-    squareFeet: safeNumber(airtableRecord['Square feet']), // Number field
-    maxStudentsLicensedFor: safeNumber(airtableRecord['Max Students Licensed For']), // Number
-    neighborhood: airtableRecord['Neighborhood'] || '', // Single line text
-    coLocationType: airtableRecord['Co-Location Type'] || '', // Single select
-    coLocationPartner: airtableRecord['Co-Location Partner '] || '', // Single line text
-    leaseEndDate: airtableRecord['Lease End Date'] || null, // Date field
-    lease: airtableRecord['Lease'] || '', // Attachments field
-    timeZone: airtableRecord['Time Zone'] || '', // Single select
-    city: airtableRecord['City'] || '', // Single line text
-    state: airtableRecord['State'] || '', // Single line text
-    locationKey: airtableRecord['Location Key'] || '', // Formula field,
-    latitude: airtableRecord['Latitude'] || null, // Number field
-    longitude: airtableRecord['Longitude'] || null, // Number field
-    censusTract: airtableRecord['Census Tract'] || '', // Single line text
-    qualCDFI: airtableRecord['Qualified Low Income Census Tract'], // Checkbox field
-    createdTime: airtableRecord.createdTime
-  };
+export const transformLocationData = (r) => r && {
+  id: r.id,
+  schoolId: r['school_id'],
+  address: r['Address'] || '',
+  startDate: r['Start of time at location'] || '',
+  endDate: r['End of time at location'] || null,
+  locationType: r['Location type'] || '',
+  currentMailingAddress: r['Current mailing address?'],
+  currentPhysicalAddress: r['Current physical address?'],
+  squareFeet: safeNumber(r['Square feet']),
+  maxStudentsLicensedFor: safeNumber(r['Max Students Licensed For']),
+  neighborhood: r['Neighborhood'] || '',
+  coLocationType: r['Co-Location Type'] || '',
+  coLocationPartner: r['Co-Location Partner '] || '',
+  leaseEndDate: r['Lease End Date'] || null,
+  lease: r['Lease'] || '',
+  timeZone: r['Time Zone'] || '',
+  city: r['City'] || '',
+  state: r['State'] || '',
+  locationKey: r['Location Key'] || '',
+  latitude: r['Latitude'] || null,
+  longitude: r['Longitude'] || null,
+  censusTract: r['Census Tract'] || '',
+  qualCDFI: r['Qualified Low Income Census Tract'],
+  createdTime: r.createdTime
 };
 
-// Transform action step data with actual Airtable field names
-export const transformActionStepData = (airtableRecord) => {
-  if (!airtableRecord) return null;
-
-  return {
-    id: airtableRecord.id,
-    schoolId: airtableRecord['school_id'], // Use the formula field, not the relationship
-    schoolName: airtableRecord['School Short Name'] || '', // Lookup field
-    schoolStatus: airtableRecord['School Status'] || '', // Single select
-    schoolStage: airtableRecord['SSJ Stage'] || '', // Single select
-    item: airtableRecord['Item'] || '', // Multiline text
-    assigneeId: airtableRecord['assignee_id'] || '', // Use the formula field for ID
-    assigneeShortName: airtableRecord['Assignee Short Name'] || 'Unknown', // Lookup field
-    status: airtableRecord['Status'], // Single select
-    dueDate: airtableRecord['Due date'] || null, // Date field
-    assignedDate: airtableRecord['Assigned date'] || null, // Date field
-    completedDate: airtableRecord['Completed date'] || null, // Date field
-    actionStepKey: airtableRecord['action_step_id'] || '', // Formula field
-    createdTime: airtableRecord.createdTime
-  };
+export const transformActionStepData = (r) => r && {
+  id: r.id,
+  schoolId: r['school_id'],
+  schoolName: r['School Short Name'] || '',
+  schoolStatus: r['School Status'] || '',
+  schoolStage: r['SSJ Stage'] || '',
+  item: r['Item'] || '',
+  assigneeId: r['assignee_id'] || '',
+  assigneeShortName: r['Assignee Short Name'] || 'Unknown',
+  status: r['Status'],
+  dueDate: r['Due date'] || null,
+  assignedDate: r['Assigned date'] || null,
+  completedDate: r['Completed date'] || null,
+  actionStepKey: r['action_step_id'] || '',
+  createdTime: r.createdTime
 };
 
-// Transform school note data with actual Airtable field names
-export const transformSchoolNoteData = (airtableRecord) => {
-  if (!airtableRecord) return null;
-
-  return {
-    id: airtableRecord.id,
-    schoolId: airtableRecord['school_id'], // Use the formula field, not the relationship
-    noteText: airtableRecord['Notes'] || '', // Multiline text
-    createdBy: airtableRecord['Partner Short Name'] || '', // Lookup field
-    createdDate: airtableRecord['Date created'] || '', // Date field
-    isPrivate: airtableRecord['Private'], // Checkbox field
-    createdTime: airtableRecord.createdTime
-  };
+export const transformSchoolNoteData = (r) => r && {
+  id: r.id,
+  schoolId: r['school_id'],
+  noteText: r['Notes'] || '',
+  createdBy: r['Partner Short Name'] || '',
+  createdDate: r['Date created'] || '',
+  isPrivate: r['Private'],
+  createdTime: r.createdTime
 };
 
-// Transform governance doc data with actual Airtable field names
-export const transformGovernanceDocData = (airtableRecord) => {
-  if (!airtableRecord) return null;
-
-  return {
-    id: airtableRecord.id,
-    schoolId: airtableRecord['school_id'], // Use the formula field, not the relationship
-    documentType: airtableRecord['Document type'] || '', // Single select
-    date: airtableRecord['Date'] || '', // Date field
-    doc: airtableRecord['Document PDF'] || '', // Attachment field
-    //          Array.isArray(airtableRecord['Document PDF']) && 
-    //          airtableRecord['Document PDF'].length > 0 ? 
-    //            airtableRecord['Document PDF'][0].url : ''), // Attachment field
-    docNotes: airtableRecord['Doc notes'] || '', // Rich text
-    createdTime: airtableRecord.createdTime
-  };
+export const transformGovernanceDocData = (r) => r && {
+  id: r.id,
+  schoolId: r['school_id'],
+  documentType: r['Document type'] || '',
+  date: r['Date'] || '',
+  doc: r['Document PDF'] || '',
+  docNotes: r['Doc notes'] || '',
+  createdTime: r.createdTime
 };
 
-// Transform educator x school relationship with actual field names
-export const transformEducatorXSchoolData = (airtableRecord) => {
-  if (!airtableRecord) return null;
-
-  return {
-    id: airtableRecord.id,
-    educatorId: airtableRecord['educator_id'], // Use the formula field for ID,
-    schoolId: airtableRecord['school_id'], // Use the formula field for ID
-    schoolShortName: airtableRecord['School Short Name'] || '', // Lookup field
-    educatorName: airtableRecord['Educator Full Name'] || 'Unknown', // Lookup field
-    startDate: airtableRecord.['Start Date'] || null, // Date field
-    endDate: airtableRecord.['End Date'] || null,  // Date field
-    currentlyActive: airtableRecord['Currently Active'], // Checkbox field
-    emailAtSchool: airtableRecord['Email at School'] || '', // Email field
-    roles: airtableRecord['Roles'] || [], // Multiple select field
-    ssjStage: airtableRecord['SSJ Stage'] || '', // Single select
-    schoolStatus: airtableRecord['School Status'] || '', // Single select
-    stageStatus: airtableRecord['Stage_Status'] || '', // Formula
-    onConnected: airtableRecord['On Connected'] || '', // Single select
-    onSlack: airtableRecord['On Slack'] || '', // Single select
-    onTeacherLeaderGoogleGroup: airtableRecord['On Teacher Leader Google Group'] || '', // Single select
-    onWildflowerDirectory: airtableRecord['On Wildflower Directory'] || '', // Single select
-    emailStatus: airtableRecord['Email Status'] || '', // Single select
-    onNationalWebsite: airtableRecord['On National Website'] || '', // Single select
-    gsuiteRoles: airtableRecord['G Suite Roles'] || [], // Multiple select
-    removalInitiator: airtableRecord['Who Initiated E/TL removal?'] || '', // Text field  
-    createdTime: airtableRecord.createdTime
-  };
+export const transformEducatorXSchoolData = (r) => r && {
+  id: r.id,
+  educatorId: r['educator_id'],
+  schoolId: r['school_id'],
+  schoolShortName: r['School Short Name'] || '',
+  educatorName: r['Educator Full Name'] || 'Unknown',
+  startDate: r['Start Date'] || null,
+  endDate: r['End Date'] || null,
+  currentlyActive: r['Currently Active'],
+  emailAtSchool: r['Email at School'] || '',
+  roles: r['Roles'] || [],
+  ssjStage: r['SSJ Stage'] || '',
+  schoolStatus: r['School Status'] || '',
+  stageStatus: r['Stage_Status'] || '',
+  onConnected: r['On Connected'] || '',
+  onSlack: r['On Slack'] || '',
+  onTeacherLeaderGoogleGroup: r['On Teacher Leader Google Group'] || '',
+  onWildflowerDirectory: r['On Wildflower Directory'] || '',
+  emailStatus: r['Email Status'] || '',
+  onNationalWebsite: r['On National Website'] || '',
+  gsuiteRoles: r['G Suite Roles'] || [],
+  removalInitiator: r['Who Initiated E/TL removal?'] || '',
+  createdTime: r.createdTime
 };
 
-// Transform school data with actual Airtable field names
-export const transformSchoolData = (airtableRecord) => {
-  if (!airtableRecord) return null;
-
-  return {
-    id: airtableRecord.id,
-    name: airtableRecord['Name'] || '',
-    shortName: airtableRecord['Short Name'] '',
-    schoolStatus: airtableRecord['School Status'] || '', // Single select
-    governanceModel: airtableRecord['Governance Model'] || '', // Single select
-    agesServed: airtableRecord['Ages served'] || [], // Multiple selects
-
-    // Location data from lookups
-    currentPhysicalAddress: airtableRecord['Current Physical Address'] || '',
-    activeLocationCity: airtableRecord['Current Physical Address - City'],
-    activeLocationState: airtableRecord['Current Physical Address - State'],
-    targetCity: airtableRecord['SSJ - Target City'] || null,
-    targetState: airtableRecord['SSJ - Target State'] || null,
-
-    priorNames: airtableRecord['Prior Names'] || '', // Single line text
-    narrative: airtableRecord['Narrative'] || '', // Multiline text
-    institutionalPartner: airtableRecord['Institutional partner'] || null, // Single line text
-    opened: airtableRecord['Opened'] || null, // Date field
-    charterName: airtableRecord['Charter Name'] || '', // Single line text
-    stageStatus: airtableRecord['Stage_Status'] || '', // Formula field
-    membershipStatus: airtableRecord['Membership Status'] || '', // Single select
-    founders: airtableRecord['Founders'] || [], // Rollup from relationships
-    membershipAgreementDate: airtableRecord['Membership Agreement date'] || '', // Date
-    signedMembershipAgreement: airtableRecord['Signed Membership Agreement'] || '', // Attachment field
-    agreementVersion: airtableRecord['Agreement Version'] || '', // Single select
-    about: airtableRecord['About'] || '', // Multiline text
-    aboutSpanish: airtableRecord['About Spanish'] || '', // Multiline text
-
-
-    
-    // SSJ/OSS Data - all actual field names from the metadata
-    ssjStage: airtableRecord['SSJ Stage'] || '', // Single select
-    ssjTargetCity: airtableRecord['SSJ - Target City'] || '', // Single line text
-    ssjTargetState: airtableRecord['SSJ - Target State'] || '', // Single line text
-    ssjOriginalProjectedOpenDate: airtableRecord['SSJ - Original Projected Open Date'] || '', // Date
-    ssjProjOpenSchoolYear: airtableRecord['SSJ - Proj Open School Year'] || '', // Formula
-    ssjProjectedOpen: airtableRecord['SSJ - Projected Open'] || '', // Date
-    riskFactors: airtableRecord['Risk Factors'] || [], // Multiple selects
-    watchlist: airtableRecord['Watchlist'] || [], // Multiple selects
-    ssjBoardDevelopment: airtableRecord['SSJ - Board development'] || '', // Single select
-    enteredVisioningDate: airtableRecord['Entered Visioning Date'] || '', // Date
-    enteredPlanningDate: airtableRecord['Entered Planning Date'] || '', // Date
-    enteredStartupDate: airtableRecord['Entered Startup Date'] || '', // Date
-    ssjHasETLPartner: airtableRecord['SSJ - Has the ETL identified a partner?'] || '', // Single select
-    ssjOpsGuideTrack: airtableRecord['SSJ - Ops Guide Support Track'] || [], // Multiple selects
-    ssjReadinessRating: airtableRecord['SSJ - Readiness to Open Rating'] || '', // Single select
-    ssjFacility: airtableRecord['SSJ - Facility'] || '', // Single select
-    building4GoodFirm: airtableRecord['Building4Good Firm & Attorney'] || '', // Single line text
-    ssjTotalStartupFunding: airtableRecord['SSJ - Total Startup Funding Needed'] || '', // Single line text
-    ssjFundraisingNarrative: airtableRecord['SSJ - Fundraising narrative'] || '', // Multiline text
-    planningAlbum: airtableRecord['Planning Album'] || '', // Attachment field
-    activePodMember: airtableRecord['Active Pod Member'] || '', // Single select
-    cohorts: airtableRecord['Cohorts'] || [], // Multiple selects
-
-
-    
-    // Systems - all actual field names
-    googleVoice: airtableRecord['Google Voice'] || '', // Single select
-    budgetUtility: airtableRecord['Budget Utility'] || '', // Single select
-    admissionsSystem: airtableRecord['Admissions System'] || '', // Single select
-    qbo: airtableRecord['QBO'] || '', // Single select
-    websiteTool: airtableRecord['Website tool'] || '', // Single select
-    logoDesigner: airtableRecord['Logo designer'] || '', // Single select
-    transparentClassroom: airtableRecord['Transparent Classroom'] || '', // Single select
-    tcAdmissions: airtableRecord['TC Admissions'] || '', // Single select
-    tcRecordkeeping: airtableRecord['TC Recordkeeping'] || '', // Single select
-    gusto: airtableRecord['Gusto'] || '', // Single select
-    businessInsurance: airtableRecord['Business Insurance'] || '', // Single select
-    nameSelectionProposal: airtableRecord['Name Selection Proposal'] || '', // Single select
-    trademarkFiled: airtableRecord['Trademark Filed'] || '', // Single select
-    billComAccount: airtableRecord['Bill.com Account'] || '', // Single select
-    googleWorkspacePath: airtableRecord['Google Workspace Org Unit Path'] || '', // Text
-    budgetLink: airtableRecord['Budget Link'] || '', // Single line text
-    bookkeeper: airtableRecord['Bookkeeper / Accountant'] || '', // Single select
-
-
-    
-    // Additional fields
-    currentTLs: airtableRecord['Current TLs'] || [], // Rollup
-    programFocus: airtableRecord['Program Focus'] || [], // Multiple selects
-    maxCapacityEnrollments: safeNumber(airtableRecord['Enrollment at Full Capacity']), // Number
-    numberOfClassrooms: safeNumber(airtableRecord['Number of classrooms']), // Number
-    schoolCalendar: airtableRecord['School calendar'] || '', // Single select
-    schoolSchedule: airtableRecord['School schedule'] || [], // Multiple selects
-    flexibleTuitionModel: airtableRecord['Flexible Tuition Model'] === true, // Checkbox
-    publicFundingSources: airtableRecord['Public funding sources'] || [], // Multiple selects
-    
-    // Contact and Comms info
-    schoolEmail: airtableRecord['School Email'] || '', // Email field
-    emailDomain: airtableRecord['Email Domain'] || '', // Single line text
-    primaryPhone: airtableRecord['School Phone'] || '', // Phone number field
-    secondaryPhone: airtableRecord['Secondary Phone'] || null, // Phone number field
-    facebook: airtableRecord['Facebook'] || '', // Single line text
-    instagram: airtableRecord['Instagram'] || '', // Single line text
-    website: airtableRecord['Website'] || '', // Single line text
-    onNationalWebsite: airtableRecord['On National Website'] || '', // Single select
-    
-    // Logo - check for attachment field
-    logo: (airtableRecord['Logo'] && 
-           Array.isArray(airtableRecord['Logo']) && 
-           airtableRecord['Logo'].length > 0) ? 
-             airtableRecord['Logo'][0].url : null, // Attachment field
-    logoThumbnail: (airtableRecord['Logo'] && 
-                    Array.isArray(airtableRecord['Logo']) && 
-                    airtableRecord['Logo'].length > 0 &&
-                    airtableRecord['Logo'][0].thumbnails) ? 
-                      airtableRecord['Logo'][0].thumbnails.large?.url || 
-                      airtableRecord['Logo'][0].thumbnails.small?.url || 
-                      airtableRecord['Logo'][0].url : null,
-    
-    // Legal entity
-    legalStructure: airtableRecord['Legal structure'] || '', // Single select
-    ein: airtableRecord['EIN'] || '', // Single line text
-    legalName: airtableRecord['Legal Name'] || '', // Single line text
-    incorporationDate: airtableRecord['Incorporation Date'] || '', // Date field
-    nonprofitStatus: airtableRecord['Nonprofit status'] || '', // Single select
-    groupExemptionStatus: airtableRecord['Group exemption status'] || '', // Single select
-    dateReceivedGroupExemption: airtableRecord['Date received group exemption'] || '', // Date
-    dateWithdrawnFromGroupExemption: airtableRecord['Date withdrawn from Group Exemption'] || null, // Date
-    currentFYEnd: airtableRecord['Current FY end'] || '', // Single select
-
-    
-    // Closed school fields
-    leftNetworkDate: airtableRecord['Left Network Date'] || null, // Date
-    leftNetworkReason: airtableRecord['Left Network Reason'] || [], // Multiple selects
-    
-    createdTime: airtableRecord.createdTime
-  };
+export const transformSchoolData = (r) => r && {
+  id: r.id,
+  name: r['Name'] || '',
+  shortName: r['Short Name'] || '',
+  schoolStatus: r['School Status'] || '',
+  governanceModel: r['Governance Model'] || '',
+  agesServed: r['Ages served'] || [],
+  // --- Location data from lookups ---
+  currentPhysicalAddress: r['Current Physical Address'] || '',
+  activeLocationCity: r['Current Physical Address - City'],
+  activeLocationState: r['Current Physical Address - State'],
+  targetCity: r['SSJ - Target City'] || null,
+  targetState: r['SSJ - Target State'] || null,
+  priorNames: r['Prior Names'] || '',
+  narrative: r['Narrative'] || '',
+  institutionalPartner: r['Institutional partner'] || null,
+  opened: r['Opened'] || null,
+  charterName: r['Charter Name'] || '',
+  stageStatus: r['Stage_Status'] || '',
+  membershipStatus: r['Membership Status'] || '',
+  founders: r['Founders'] || [],
+  membershipAgreementDate: r['Membership Agreement date'] || '',
+  signedMembershipAgreement: r['Signed Membership Agreement'] || '',
+  agreementVersion: r['Agreement Version'] || '',
+  about: r['About'] || '',
+  aboutSpanish: r['About Spanish'] || '',
+  // --- SSJ/OSS Data ---
+  ssjStage: r['SSJ Stage'] || '',
+  ssjTargetCity: r['SSJ - Target City'] || '',
+  ssjTargetState: r['SSJ - Target State'] || '',
+  ssjOriginalProjectedOpenDate: r['SSJ - Original Projected Open Date'] || '',
+  ssjProjOpenSchoolYear: r['SSJ - Proj Open School Year'] || '',
+  ssjProjectedOpen: r['SSJ - Projected Open'] || '',
+  riskFactors: r['Risk Factors'] || [],
+  watchlist: r['Watchlist'] || [],
+  ssjBoardDevelopment: r['SSJ - Board development'] || '',
+  enteredVisioningDate: r['Entered Visioning Date'] || '',
+  enteredPlanningDate: r['Entered Planning Date'] || '',
+  enteredStartupDate: r['Entered Startup Date'] || '',
+  ssjHasETLPartner: r['SSJ - Has the ETL identified a partner?'] || '',
+  ssjOpsGuideTrack: r['SSJ - Ops Guide Support Track'] || [],
+  ssjReadinessRating: r['SSJ - Readiness to Open Rating'] || '',
+  ssjFacility: r['SSJ - Facility'] || '',
+  building4GoodFirm: r['Building4Good Firm & Attorney'] || '',
+  ssjTotalStartupFunding: r['SSJ - Total Startup Funding Needed'] || '',
+  ssjFundraisingNarrative: r['SSJ - Fundraising narrative'] || '',
+  planningAlbum: r['Planning Album'] || '',
+  activePodMember: r['Active Pod Member'] || '',
+  cohorts: r['Cohorts'] || [],
+  // --- Systems ---
+  googleVoice: r['Google Voice'] || '',
+  budgetUtility: r['Budget Utility'] || '',
+  admissionsSystem: r['Admissions System'] || '',
+  qbo: r['QBO'] || '',
+  websiteTool: r['Website tool'] || '',
+  logoDesigner: r['Logo designer'] || '',
+  transparentClassroom: r['Transparent Classroom'] || '',
+  tcAdmissions: r['TC Admissions'] || '',
+  tcRecordkeeping: r['TC Recordkeeping'] || '',
+  gusto: r['Gusto'] || '',
+  businessInsurance: r['Business Insurance'] || '',
+  nameSelectionProposal: r['Name Selection Proposal'] || '',
+  trademarkFiled: r['Trademark Filed'] || '',
+  billComAccount: r['Bill.com Account'] || '',
+  googleWorkspacePath: r['Google Workspace Org Unit Path'] || '',
+  budgetLink: r['Budget Link'] || '',
+  bookkeeper: r['Bookkeeper / Accountant'] || '',
+  // --- Additional fields ---
+  currentTLs: r['Current TLs'] || [],
+  programFocus: r['Program Focus'] || [],
+  maxCapacityEnrollments: safeNumber(r['Enrollment at Full Capacity']),
+  numberOfClassrooms: safeNumber(r['Number of classrooms']),
+  schoolCalendar: r['School calendar'] || '',
+  schoolSchedule: r['School schedule'] || [],
+  flexibleTuitionModel: r['Flexible Tuition Model'] === true,
+  publicFundingSources: r['Public funding sources'] || [],
+  schoolEmail: r['School Email'] || '',
+  emailDomain: r['Email Domain'] || '',
+  primaryPhone: r['School Phone'] || '',
+  secondaryPhone: r['Secondary Phone'] || null,
+  facebook: r['Facebook'] || '',
+  instagram: r['Instagram'] || '',
+  website: r['Website'] || '',
+  onNationalWebsite: r['On National Website'] || '',
+  // Logo fields
+  logo: (r['Logo'] && Array.isArray(r['Logo']) && r['Logo'].length > 0)
+    ? r['Logo'][0].url : null,
+  logoThumbnail: (r['Logo'] && Array.isArray(r['Logo']) && r['Logo'].length > 0 && r['Logo'][0].thumbnails)
+    ? r['Logo'][0].thumbnails.large?.url || r['Logo'][0].thumbnails.small?.url || r['Logo'][0].url
+    : null,
+  // Legal entity
+  legalStructure: r['Legal structure'] || '',
+  ein: r['EIN'] || '',
+  legalName: r['Legal Name'] || '',
+  incorporationDate: r['Incorporation Date'] || '',
+  nonprofitStatus: r['Nonprofit status'] || '',
+  groupExemptionStatus: r['Group exemption status'] || '',
+  dateReceivedGroupExemption: r['Date received group exemption'] || '',
+  dateWithdrawnFromGroupExemption: r['Date withdrawn from Group Exemption'] || null,
+  currentFYEnd: r['Current FY end'] || '',
+  leftNetworkDate: r['Left Network Date'] || null,
+  leftNetworkReason: r['Left Network Reason'] || [],
+  createdTime: r.createdTime
 };
 
-// Transform educator data (keeping existing structure as it looked correct)
-export const transformEducatorData = (airtableRecord) => {
-  if (!airtableRecord) return null;
-
-  return {
-    id: airtableRecord.id,
-    fullName: airtableRecord['Full Name'] || '',
-    firstName: airtableRecord['First Name'] || '',
-    nickname: airtableRecord['Nickname'] || '',
-    middleName: airtableRecord['Middle Name'] || '',
-    lastName: airtableRecord['Last Name'] || '',
-    contactEmail: airtableRecord['Current Primary Email Address'],
-    emailAddresses: airtableRecord['Email Addresses'] || [],
-    currentlyActiveAtASchool: airtableRecord['Currently Active at a School?'],
-    currentSchool: airtableRecord['Currently Active School'] || '',
-    currentSchoolStageStatus: airtableRecord['Stage_Status for Active School'] || '', // Formula field
-    currentRole: airtableRecord['Current Role'] || '', // Single select
-    discoveryStatus: airtableRecord['Discovery status'] || '',
-    individualType: airtableRecord['Individual Type'] || '',
-    montessoriCertified: airtableRecord['Montessori Certified'],
-    montessoriLeadGuideTraining: airtableRecord['Montessori Lead Guide Training'] || '',
-    startupStageForActiveSchool: airtableRecord['Startup Stage for Active School'] || '',
-
-    
-    // Demographics
-    pronouns: airtableRecord['Pronouns'] || '',
-    pronounsOther: airtableRecord['Pronouns - Other'] || '',
-    raceEthnicity: airtableRecord['Race & Ethnicity'] || [],
-    raceEthnicityOther: airtableRecord['Race & Ethnicity - Other'] || '',
-    gender: airtableRecord['Gender'] || '',
-    genderOther: airtableRecord['Gender - Other'] || '',
-    householdIncome: airtableRecord['Household Income'] || '',
-    incomeBackground: airtableRecord['Income Background'] || '',
-    educationalAttainment: airtableRecord['Educational Attainment'] || '',
-    lgbtqia: airtableRecord['LGBTQIA'] === 'TRUE',
-    primaryLanguage: safeExtract(airtableRecord['Primary Language']) || '',
-    otherLanguages: airtableRecord['Other languages'] || [],
-    
-    // Contact Info
-    primaryPhone: airtableRecord['Primary phone'] || null,
-    secondaryPhone: airtableRecord['Secondary phone'] || null,
-    homeAddress: airtableRecord['Home Address'] || '',
-    excludeFromEmailLogging: airtableRecord['Exclude from email logging'], // Checkbox
-
-
-    // Target location
-    targetGeo: airtableRecord['Target geo combined'] || '',
-    targetIntl: airtableRecord['Target - international'] || '',
-    targetCity: airtableRecord['Target city'] || '',
-    targetState: airtableRecord['Target state'] || '',
-  
-    assignedPartnerEmail: airtableRecord['Assigned Partner Email'] || '', // Lookup field
-    assignedPartnerOverride: airtableRecord['Assigned Partner Override'] || '', // Single line text
-    assignedPartnerShortName: airtableRecord['Assigned Partner Short Name'] || '', // Lookup field
-
-    selfReflection: airtableRecord['Self-reflection'] || '', // Attachment
-  
-    // First contact info
-    firstContactRelocate: airtableRecord['First Contact - Willingness to Relocate'] || '', // Single select
-    firstContactGovernance: airtableRecord['First Contact - Initial Interest in Governance Model'] || '', // Single select
-    firstContactPreWFEmployment: airtableRecord['First Contact - Notes on pre-Wildflower Employment'] || '', // Single select
-    firstContactWFSchoolEmployee: airtableRecord['First Contact - WF School Employment Status'] || '',
-    firstContactAges: airtableRecord['First Contact - initial interest in ages'] || [], // Multiple selects
-    firstContactInterests: airtableRecord['First Contact - Initial Interests'] || '', // Text
-
-    // Ops Guide
-    opsGuideMeetingPrefTime: airtableRecord['Ops Guide Meeting Preferrence Time'] || '', // Single select
-    opsGuideSpecificsChecklist: airtableRecord['Ops Guide Specifics Checklist'] || [], // Multiple selects
-    opsGuideReqPertinentInfo: airtableRecord['Ops Guide Request Pertinent Info'] || [], // Multiple selects
-    opsGuideSupportTypeNeeded: airtableRecord['Ops Guide Support Type Needed'] || [], // Multiple selects
-    opsGuideFundraisingOps: airtableRecord['Ops Guide Any fundraising opportunities?'] || '', // Long text
-
-    inactiveFlag: airtableRecord['Inactive Flag'] || '', // Checkbox
-    createdTime: airtableRecord.createdTime
-  };
+export const transformEducatorData = (r) => r && {
+  id: r.id,
+  fullName: r['Full Name'] || '',
+  firstName: r['First Name'] || '',
+  nickname: r['Nickname'] || '',
+  middleName: r['Middle Name'] || '',
+  lastName: r['Last Name'] || '',
+  contactEmail: r['Current Primary Email Address'],
+  emailAddresses: r['Email Addresses'] || [],
+  currentlyActiveAtASchool: r['Currently Active at a School?'],
+  currentSchool: r['Currently Active School'] || '',
+  currentSchoolStageStatus: r['Stage_Status for Active School'] || '',
+  currentRole: r['Current Role'] || '',
+  discoveryStatus: r['Discovery status'] || '',
+  individualType: r['Individual Type'] || '',
+  montessoriCertified: r['Montessori Certified'],
+  montessoriLeadGuideTraining: r['Montessori Lead Guide Training'] || '',
+  startupStageForActiveSchool: r['Startup Stage for Active School'] || '',
+  // Demographics
+  pronouns: r['Pronouns'] || '',
+  pronounsOther: r['Pronouns - Other'] || '',
+  raceEthnicity: r['Race & Ethnicity'] || [],
+  raceEthnicityOther: r['Race & Ethnicity - Other'] || '',
+  gender: r['Gender'] || '',
+  genderOther: r['Gender - Other'] || '',
+  householdIncome: r['Household Income'] || '',
+  incomeBackground: r['Income Background'] || '',
+  educationalAttainment: r['Educational Attainment'] || '',
+  lgbtqia: r['LGBTQIA'] === 'TRUE',
+  primaryLanguage: safeExtract(r['Primary Language']) || '',
+  otherLanguages: r['Other languages'] || [],
+  primaryPhone: r['Primary phone'] || null,
+  secondaryPhone: r['Secondary phone'] || null,
+  homeAddress: r['Home Address'] || '',
+  excludeFromEmailLogging: r['Exclude from email logging'],
+  targetGeo: r['Target geo combined'] || '',
+  targetIntl: r['Target - international'] || '',
+  targetCity: r['Target city'] || '',
+  targetState: r['Target state'] || '',
+  assignedPartnerEmail: r['Assigned Partner Email'] || '',
+  assignedPartnerOverride: r['Assigned Partner Override'] || '',
+  assignedPartnerShortName: r['Assigned Partner Short Name'] || '',
+  selfReflection: r['Self-reflection'] || '',
+  firstContactRelocate: r['First Contact - Willingness to Relocate'] || '',
+  firstContactGovernance: r['First Contact - Initial Interest in Governance Model'] || '',
+  firstContactPreWFEmployment: r['First Contact - Notes on pre-Wildflower Employment'] || '',
+  firstContactWFSchoolEmployee: r['First Contact - WF School Employment Status'] || '',
+  firstContactAges: r['First Contact - initial interest in ages'] || [],
+  firstContactInterests: r['First Contact - Initial Interests'] || '',
+  opsGuideMeetingPrefTime: r['Ops Guide Meeting Preferrence Time'] || '',
+  opsGuideSpecificsChecklist: r['Ops Guide Specifics Checklist'] || [],
+  opsGuideReqPertinentInfo: r['Ops Guide Request Pertinent Info'] || [],
+  opsGuideSupportTypeNeeded: r['Ops Guide Support Type Needed'] || [],
+  opsGuideFundraisingOps: r['Ops Guide Any fundraising opportunities?'] || '',
+  inactiveFlag: r['Inactive Flag'] || '',
+  createdTime: r.createdTime
 };
 
-// Batch transform functions
-export const transformSchoolsData = (airtableRecords) => {
-  if (!Array.isArray(airtableRecords)) {
-    return [];
-  }
-  return airtableRecords.map(transformSchoolData).filter(Boolean);
+export const transformCharterData = (r) => r && {
+  id: r.id,
+  name: r['Full name'] || r['Charter key'] || '',
+  shortName: r['Short Name'] || '',
+  status: r['Status'] || '',
+  initialTargetCommunity: r['Initial target community'] || ''
 };
 
-export const transformEducatorsData = (airtableRecords) => {
-  if (!Array.isArray(airtableRecords)) {
-    return [];
-  }
-  return airtableRecords.map(transformEducatorData).filter(Boolean);
-};
+// ---- Batch transformers ----
 
-export const transformEducatorsXSchoolsData = (airtableRecords) => {
-  if (!Array.isArray(airtableRecords)) {
-    return [];
-  }
-  return airtableRecords.map(transformEducatorXSchoolData).filter(Boolean);
-};
-
-export const transformLocationsData = (airtableRecords) => {
-  if (!Array.isArray(airtableRecords)) {
-    return [];
-  }
-  return airtableRecords.map(transformLocationData).filter(Boolean);
-};
-
-export const transformGrantsData = (airtableRecords) => {
-  if (!Array.isArray(airtableRecords)) {
-    return [];
-  }
-  return airtableRecords.map(transformGrantData).filter(Boolean);
-};
-
-export const transformLoansData = (airtableRecords) => {
-  if (!Array.isArray(airtableRecords)) {
-    return [];
-  }
-  return airtableRecords.map(transformLoanData).filter(Boolean);
-};
-
-export const transformGuideAssignmentsData = (airtableRecords) => {
-  if (!Array.isArray(airtableRecords)) {
-    return [];
-  }
-  return airtableRecords.map(transformGuideAssignmentData).filter(Boolean);
-};
-
-export const transformActionStepsData = (airtableRecords) => {
-  if (!Array.isArray(airtableRecords)) {
-    return [];
-  }
-  return airtableRecords.map(transformActionStepData).filter(Boolean);
-};
-
-// Charter data transformer (keeping minimal structure)
-export const transformCharterData = (airtableRecord) => {
-  if (!airtableRecord) return null;
-
-  return {
-    id: airtableRecord.id,
-    name: airtableRecord['Full name'] || airtableRecord['Charter key'] || '',
-    shortName: airtableRecord['Short Name'] || '',
-    status: airtableRecord['Status'] || '',
-    initialTargetCommunity: airtableRecord['Initial target community'] || ''
-  };
-};
-
-export const transformChartersData = (airtableRecords) => {
-  if (!Array.isArray(airtableRecords)) {
-    return [];
-  }
-  return airtableRecords.map(transformCharterData).filter(Boolean);
-};
+export const transformSchoolsData = (records) => Array.isArray(records) ? records.map(transformSchoolData).filter(Boolean) : [];
+export const transformEducatorsData = (records) => Array.isArray(records) ? records.map(transformEducatorData).filter(Boolean) : [];
+export const transformEducatorsXSchoolsData = (records) => Array.isArray(records) ? records.map(transformEducatorXSchoolData).filter(Boolean) : [];
+export const transformLocationsData = (records) => Array.isArray(records) ? records.map(transformLocationData).filter(Boolean) : [];
+export const transformGrantsData = (records) => Array.isArray(records) ? records.map(transformGrantData).filter(Boolean) : [];
+export const transformLoansData = (records) => Array.isArray(records) ? records.map(transformLoanData).filter(Boolean) : [];
+export const transformGuideAssignmentsData = (records) => Array.isArray(records) ? records.map(transformGuideAssignmentData).filter(Boolean) : [];
+export const transformActionStepsData = (records) => Array.isArray(records) ? records.map(transformActionStepData).filter(Boolean) : [];
+export const transformSchoolNotesData = (records) => Array.isArray(records) ? records.map(transformSchoolNoteData).filter(Boolean) : [];
+export const transformGovernanceDocsData = (records) => Array.isArray(records) ? records.map(transformGovernanceDocData).filter(Boolean) : [];
+export const transformChartersData = (records) => Array.isArray(records) ? records.map(transformCharterData).filter(Boolean) : [];

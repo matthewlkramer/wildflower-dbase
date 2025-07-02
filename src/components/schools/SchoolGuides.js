@@ -1,36 +1,31 @@
-import React from "react";
-import Pills from "../shared/Pills";
+import React from 'react';
 
-const SchoolGuides = ({ school }) => {
-  if (!school.guides || school.guides.length === 0)
-    return <div className="text-gray-500">No guides assigned.</div>;
-
-  return (
-    <div>
-      <table className="min-w-full text-sm">
-        <thead>
-          <tr>
-            <th className="text-left p-2">Guide</th>
-            <th className="text-left p-2">Type</th>
-            <th className="text-left p-2">Start</th>
-            <th className="text-left p-2">End</th>
-            <th className="text-left p-2">Active?</th>
+const SchoolGuides = ({ guides }) => (
+  <div>
+    <h2 className="font-semibold text-lg mb-4">Guide Assignments</h2>
+    <table className="min-w-full border rounded">
+      <thead>
+        <tr>
+          <th>Guide Name</th>
+          <th>Type</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {guides && guides.length ? guides.map(guide => (
+          <tr key={guide.id}>
+            <td>{guide.guideShortName}</td>
+            <td>{guide.type}</td>
+            <td>{guide.startDate}</td>
+            <td>{guide.endDate}</td>
+            <td>{guide.currentlyActive ? 'Active' : ''}</td>
           </tr>
-        </thead>
-        <tbody>
-          {school.guides.map((g) => (
-            <tr key={g.id} className="border-b">
-              <td className="p-2">{g.guideShortName}</td>
-              <td className="p-2">{g.type}</td>
-              <td className="p-2">{g.startDate}</td>
-              <td className="p-2">{g.endDate || "-"}</td>
-              <td className="p-2">{g.currentlyActive ? "Yes" : "No"}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-};
+        )) : <tr><td colSpan={5} className="text-center">No guide assignments found</td></tr>}
+      </tbody>
+    </table>
+  </div>
+);
 
 export default SchoolGuides;
