@@ -26,7 +26,7 @@ import SchoolActions from '../components/schools/SchoolActions';
 import SchoolInteractions from '../components/schools/SchoolInteractions';
 
 // --- Charter Tab Components ---
-import CharterSummary from '../components/charters/CharterSummary';
+import CharterSummary from '../components/charters/CharterSummary.jsx';
 
 // --- Educator Tabs Config ---
 export const educatorTabsConfig = [

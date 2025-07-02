@@ -95,7 +95,7 @@ export default function ResizableDataTable({
   }
 
   return (
-    <div className="overflow-x-auto border rounded-lg bg-white shadow">
+    <div className="overflow-x-auto border rounded-lg bg-white shadow max-w-none">
       <div className="flex items-center justify-end gap-2 px-2 py-2 border-b bg-gray-50">
         <input
           type="text"
@@ -119,8 +119,8 @@ export default function ResizableDataTable({
           + Add Record
         </button>
       </div>
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead>
+      <table className="min-w-full table-auto border-collapse divide-y divide-gray-200 rounded-lg overflow-hidden shadow-sm">
+        <thead className="bg-gray-100">
           {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => {
